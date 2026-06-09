@@ -14,7 +14,7 @@ export const portfolio = {
 
     github: "https://github.com/Om-Upadhyay",
 
-    resume: "/resume.pdf",
+    resume: "/Paccar.pdf",
 
     profileImage: "/profile.jpg",
   },

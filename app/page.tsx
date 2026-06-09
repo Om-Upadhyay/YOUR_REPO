@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
   ArrowDown,
@@ -13,6 +14,8 @@ import {
   Linkedin,
   Mail,
   Sparkles,
+  Star,
+  GitFork,
   TerminalSquare
 } from "lucide-react";
 
@@ -25,41 +28,70 @@ import {
   CardHeader,
   CardTitle
 } from "@/components/ui/card";
+import { portfolio } from "@/data/portfolio";
 
-const navItems = ["About", "Skills", "Experience", "Projects", "Certifications", "GitHub", "Contact"];
+type GithubActivity = {
+  stats: {
+    repositories: number;
+    followers: number;
+    following: number;
+  };
+  repositories: {
+    id: number;
+    name: string;
+    url: string;
+    description: string;
+    stars: number;
+    forks: number;
+    language: string;
+    updatedAt: string;
+  }[];
+};
 
-const skills = [
-  { name: "Python", value: 92 },
-  { name: "SQL", value: 86 },
-  { name: "Machine Learning", value: 84 },
-  { name: "NLP", value: 82 },
-  { name: "Flask", value: 80 },
-  { name: "MySQL", value: 78 },
-  { name: "OpenCV", value: 76 },
-  { name: "Scikit-Learn", value: 84 },
-  { name: "Pandas", value: 88 },
-  { name: "NumPy", value: 86 },
-  { name: "Power BI", value: 74 },
-  { name: "Tableau", value: 72 },
-  { name: "HTML", value: 82 },
-  { name: "CSS", value: 80 },
-  { name: "JavaScript", value: 78 }
+const navItems = [
+  { label: "About", href: "#about" },
+  { label: "Skills", href: "#skills" },
+  { label: "Experience", href: "#experience" },
+  { label: "Projects", href: "#projects" },
+  { label: "Certifications", href: "#certifications" },
+  { label: "GitHub", href: "#github-activity" },
+  { label: "Contact", href: "#contact" }
 ];
 
-const projects = [
+const skillScores: Record<string, number> = {
+  Python: 92,
+  SQL: 86,
+  "Machine Learning": 84,
+  "Natural Language Processing": 82,
+  NLP: 82,
+  Flask: 80,
+  MySQL: 78,
+  OpenCV: 76,
+  "Scikit-Learn": 84,
+  Pandas: 88,
+  NumPy: 86,
+  "Power BI": 74,
+  Tableau: 72,
+  HTML: 82,
+  CSS: 80,
+  JavaScript: 78
+};
+
+const aboutCards = [
   {
-    title: "RAJ AI Assistant",
-    description:
-      "Voice-controlled AI assistant built using Python, NLP, speech recognition, computer vision and automation.",
-    technologies: ["Python", "OpenCV", "SpeechRecognition", "Vosk", "Sentence Transformers"],
-    href: "https://github.com/Om-Upadhyay/RAJ-assitant-"
+    icon: BrainCircuit,
+    title: "AI Systems",
+    text: "I build NLP and ML-powered applications that understand text, voice, and user intent."
   },
   {
-    title: "NLP Driven Automated DSA Answer Evaluation",
-    description:
-      "AI-powered evaluation system that assesses subjective DSA answers using NLP and transformer models with 80% accuracy.",
-    technologies: ["Python", "Transformers", "Flask", "Scikit-Learn", "MySQL"],
-    href: "https://github.com/Om-Upadhyay"
+    icon: Database,
+    title: "Data Analytics",
+    text: "I work with EDA, preprocessing, insights, SQL workflows, and visualization tools."
+  },
+  {
+    icon: TerminalSquare,
+    title: "Backend Prototyping",
+    text: "I use Flask, REST APIs, and MySQL to move AI ideas from notebooks into usable apps."
   }
 ];
 
@@ -128,17 +160,53 @@ function ParticleBackground() {
 function TypingTitle() {
   return (
     <h1 className="max-w-5xl text-5xl font-black leading-[0.95] tracking-[-0.08em] text-white sm:text-7xl lg:text-8xl">
-      Om Upadhyay
+      {portfolio.personal.name}
       <span className="mt-4 block overflow-hidden whitespace-nowrap border-r-4 border-cyan-300 pr-2 text-gradient motion-safe:animate-[typing_3.5s_steps(28,end),blink_0.8s_step-end_infinite]">
-        AI & Data Analytics Engineer
+        {portfolio.personal.title}
       </span>
     </h1>
   );
 }
 
+function getSkillList() {
+  return [
+    ...portfolio.skills.languages,
+    ...portfolio.skills.ai_ml,
+    ...portfolio.skills.data_analytics,
+    ...portfolio.skills.backend,
+    ...portfolio.skills.tools
+  ]
+    .filter((skill, index, skills) => skills.indexOf(skill) === index)
+    .map((name) => ({ name, value: skillScores[name] ?? 70 }))
+    .slice(0, 18);
+}
+
 export default function Home() {
   const { scrollYProgress } = useScroll();
   const progressWidth = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+  const [githubActivity, setGithubActivity] = useState<GithubActivity | null>(null);
+  const skills = useMemo(getSkillList, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetch("/api/github")
+      .then((response) => response.json() as Promise<GithubActivity>)
+      .then((data) => {
+        if (isMounted) {
+          setGithubActivity(data);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setGithubActivity(null);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <main className="relative z-10 min-h-screen">
@@ -154,16 +222,16 @@ export default function Home() {
             <span className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-cyan-300 to-purple-500 text-slate-950">
               OU
             </span>
-            <span className="hidden sm:inline">Om Upadhyay</span>
+            <span className="hidden sm:inline">{portfolio.personal.name}</span>
           </a>
           <div className="hidden items-center gap-1 lg:flex">
             {navItems.map((item) => (
               <a
-                key={item}
-                href={`#${item.toLowerCase().replace("github", "github-activity")}`}
+                key={item.href}
+                href={item.href}
                 className="rounded-full px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/10 hover:text-white"
               >
-                {item}
+                {item.label}
               </a>
             ))}
           </div>
@@ -186,7 +254,7 @@ export default function Home() {
             </Badge>
             <TypingTitle />
             <p className="mt-7 max-w-2xl text-lg leading-8 text-muted-foreground sm:text-xl">
-              Building intelligent systems using AI, NLP, Machine Learning and Data Analytics.
+              {portfolio.personal.tagline}
             </p>
             <div className="mt-9 flex flex-wrap gap-4">
               <Button asChild size="lg">
@@ -195,7 +263,7 @@ export default function Home() {
                 </a>
               </Button>
               <Button asChild size="lg" variant="secondary">
-                <a href="/Paccar.pdf" download>
+                <a href={portfolio.personal.resume} download>
                   Download Resume <ArrowUpRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>
@@ -216,15 +284,15 @@ export default function Home() {
                   <span className="h-3 w-3 rounded-full bg-emerald-400" />
                 </div>
                 <CardTitle className="font-mono text-base text-cyan-100">ai-engineer.profile</CardTitle>
-                <CardDescription>Real-world AI + analytics readiness</CardDescription>
+                <CardDescription>Dynamic portfolio data source</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 font-mono text-sm">
                 {[
                   ["focus", "AI, NLP, ML, Data Analytics"],
-                  ["stack", "Python, Flask, SQL, OpenCV"],
-                  ["project_accuracy", "80% DSA answer evaluation"],
-                  ["cloud_foundation", "AWS Academy Graduate"],
-                  ["location", "Pune, Maharashtra"]
+                  ["projects", `${portfolio.stats.projects} featured systems`],
+                  ["certifications", `${portfolio.stats.certifications} credentials`],
+                  ["technologies", `${portfolio.stats.technologies}+ tools`],
+                  ["location", portfolio.personal.location]
                 ].map(([key, value]) => (
                   <div key={key} className="rounded-2xl border border-white/10 bg-slate-950/60 p-4">
                     <span className="text-purple-300">{key}</span>
@@ -242,26 +310,10 @@ export default function Home() {
         <SectionTitle
           eyebrow="About"
           title="An AI builder with an analytics-first brain."
-          description="I connect data exploration, model thinking, and deployable software to turn raw information into practical intelligent systems."
+          description={portfolio.about.trim().replace(/\s+/g, " ")}
         />
         <div className="grid gap-5 md:grid-cols-3">
-          {[
-            {
-              icon: BrainCircuit,
-              title: "AI Systems",
-              text: "I build NLP and ML-powered applications that understand text, voice, and user intent."
-            },
-            {
-              icon: Database,
-              title: "Data Analytics",
-              text: "I work with EDA, preprocessing, insights, SQL workflows, and visualization tools."
-            },
-            {
-              icon: TerminalSquare,
-              title: "Backend Prototyping",
-              text: "I use Flask, REST APIs, and MySQL to move AI ideas from notebooks into usable apps."
-            }
-          ].map((item, index) => (
+          {aboutCards.map((item, index) => (
             <motion.div
               key={item.title}
               initial={{ opacity: 0, y: 24 }}
@@ -285,7 +337,7 @@ export default function Home() {
         <SectionTitle
           eyebrow="Skills"
           title="A practical AI engineering toolkit."
-          description="Core tools across machine learning, analytics, backend APIs, visualization, and web foundations."
+          description="Rendered dynamically from grouped portfolio skills, with animated competency bars."
         />
         <Card className="glass-border p-6 sm:p-8">
           <div className="grid gap-5 md:grid-cols-2">
@@ -313,29 +365,38 @@ export default function Home() {
       <section id="experience" className="container py-24">
         <SectionTitle
           eyebrow="Experience"
-          title="Applied analytics in a real industry setting."
-          description="Internship experience focused on data cleaning, exploratory analysis, preprocessing, and insight generation."
+          title="Applied analytics in real industry settings."
+          description="Timeline entries now come directly from the portfolio data source."
         />
-        <div className="mx-auto max-w-3xl">
-          <motion.div
-            initial={{ opacity: 0, x: -24 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="relative border-l border-cyan-300/30 pl-8"
-          >
-            <span className="absolute -left-3 top-1 grid h-6 w-6 place-items-center rounded-full bg-cyan-300 shadow-glow">
-              <BriefcaseBusiness className="h-3.5 w-3.5 text-slate-950" />
-            </span>
-            <Card>
-              <CardHeader>
-                <Badge className="w-fit">Ashok Leyland Internship</Badge>
-                <CardTitle>Data Analyst Intern</CardTitle>
-                <CardDescription>
-                  Worked on EDA, data preprocessing and analytical insights.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </motion.div>
+        <div className="mx-auto grid max-w-3xl gap-8">
+          {portfolio.experience.map((experience, index) => (
+            <motion.div
+              key={`${experience.company}-${experience.role}`}
+              initial={{ opacity: 0, x: -24 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.08 }}
+              className="relative border-l border-cyan-300/30 pl-8"
+            >
+              <span className="absolute -left-3 top-1 grid h-6 w-6 place-items-center rounded-full bg-cyan-300 shadow-glow">
+                <BriefcaseBusiness className="h-3.5 w-3.5 text-slate-950" />
+              </span>
+              <Card>
+                <CardHeader>
+                  <Badge className="w-fit">{experience.duration}</Badge>
+                  <CardTitle>
+                    {experience.role} · {experience.company}
+                  </CardTitle>
+                  <CardDescription>{experience.description.join(" ")}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-wrap gap-2">
+                  {experience.technologies.map((technology) => (
+                    <Badge key={technology}>{technology}</Badge>
+                  ))}
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
         </div>
       </section>
 
@@ -343,10 +404,10 @@ export default function Home() {
         <SectionTitle
           eyebrow="Projects"
           title="Featured intelligent systems."
-          description="Project work across AI assistants, NLP evaluation, transformer models, automation, and backend integration."
+          description="Add or edit projects in one file and the cards update automatically."
         />
         <div className="grid gap-6 lg:grid-cols-2">
-          {projects.map((project, index) => (
+          {portfolio.projects.map((project, index) => (
             <motion.div
               key={project.title}
               initial={{ opacity: 0, y: 26 }}
@@ -359,10 +420,16 @@ export default function Home() {
                   <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-cyan-300/20 to-purple-500/20 text-cyan-200 ring-1 ring-white/10 transition group-hover:scale-110">
                     <Code2 className="h-7 w-7" />
                   </div>
+                  <Badge className="w-fit">{project.duration}</Badge>
                   <CardTitle>{project.title}</CardTitle>
                   <CardDescription>{project.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
+                  <ul className="mb-6 grid gap-2 text-sm text-muted-foreground">
+                    {project.features.slice(0, 4).map((feature) => (
+                      <li key={feature}>• {feature}</li>
+                    ))}
+                  </ul>
                   <div className="mb-6 flex flex-wrap gap-2">
                     {project.technologies.map((tech) => (
                       <Badge key={tech} className="border-purple-300/20 bg-purple-300/10 text-purple-100">
@@ -370,11 +437,13 @@ export default function Home() {
                       </Badge>
                     ))}
                   </div>
-                  <Button asChild variant="secondary">
-                    <a href={project.href} target="_blank" rel="noreferrer">
-                      GitHub <ArrowUpRight className="ml-2 h-4 w-4" />
-                    </a>
-                  </Button>
+                  {project.github ? (
+                    <Button asChild variant="secondary">
+                      <a href={project.github} target="_blank" rel="noreferrer">
+                        GitHub <ArrowUpRight className="ml-2 h-4 w-4" />
+                      </a>
+                    </Button>
+                  ) : null}
                 </CardContent>
               </Card>
             </motion.div>
@@ -386,20 +455,27 @@ export default function Home() {
         <SectionTitle
           eyebrow="Certifications"
           title="Signal from structured learning."
-          description="Certifications that strengthen cloud fundamentals, analytics thinking, and business-focused problem solving."
+          description="Certification cards are generated from portfolio data and can grow with new credentials."
         />
         <div className="grid gap-5 md:grid-cols-2">
-          {["AWS Cloud Foundations", "Deloitte Data Analytics Job Simulation"].map((cert) => (
-            <Card key={cert} className="transition duration-300 hover:-translate-y-2 hover:border-cyan-300/30">
+          {portfolio.certifications.map((cert) => (
+            <Card key={cert.title} className="transition duration-300 hover:-translate-y-2 hover:border-cyan-300/30">
               <CardHeader className="flex-row items-center gap-4 space-y-0">
                 <div className="grid h-12 w-12 place-items-center rounded-2xl bg-cyan-300/10 text-cyan-200">
                   <Award className="h-6 w-6" />
                 </div>
                 <div>
-                  <CardTitle>{cert}</CardTitle>
-                  <CardDescription>Verified professional learning milestone</CardDescription>
+                  <CardTitle>{cert.title}</CardTitle>
+                  <CardDescription>
+                    {cert.issuer} · Score: {cert.score}
+                  </CardDescription>
                 </div>
               </CardHeader>
+              <CardContent className="flex flex-wrap gap-2">
+                {cert.skills.map((skill) => (
+                  <Badge key={skill}>{skill}</Badge>
+                ))}
+              </CardContent>
             </Card>
           ))}
         </div>
@@ -408,34 +484,73 @@ export default function Home() {
       <section id="github-activity" className="container py-24">
         <SectionTitle
           eyebrow="GitHub Activity"
-          title="Code, experiments, and project evolution."
-          description="Explore my repositories and AI project work on GitHub."
+          title="Live repository activity."
+          description="This section fetches from the GitHub API through a cached Next.js route."
         />
         <Card className="glass-border overflow-hidden">
-          <CardContent className="grid gap-8 p-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+          <CardContent className="grid gap-8 p-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
             <div>
               <Github className="mb-5 h-12 w-12 text-cyan-300" />
               <h3 className="text-2xl font-bold text-white">Om-Upadhyay</h3>
               <p className="mt-3 text-muted-foreground">
-                Project work focused on AI assistants, NLP systems, analytics workflows, and Python
-                development.
+                GitHub data refreshes through <span className="font-mono text-cyan-200">/api/github</span>.
               </p>
+              <div className="mt-6 grid grid-cols-3 gap-3">
+                {[
+                  ["Repos", githubActivity?.stats.repositories ?? portfolio.stats.projects],
+                  ["Followers", githubActivity?.stats.followers ?? "—"],
+                  ["Following", githubActivity?.stats.following ?? "—"]
+                ].map(([label, value]) => (
+                  <div key={label} className="rounded-2xl border border-white/10 bg-slate-950/50 p-4">
+                    <p className="text-xs text-muted-foreground">{label}</p>
+                    <p className="mt-1 text-xl font-bold text-white">{value}</p>
+                  </div>
+                ))}
+              </div>
               <Button asChild className="mt-6" variant="secondary">
-                <a href="https://github.com/Om-Upadhyay" target="_blank" rel="noreferrer">
+                <a href={portfolio.personal.github} target="_blank" rel="noreferrer">
                   Visit GitHub <ArrowUpRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>
             </div>
-            <div className="grid gap-4 sm:grid-cols-3">
-              {[
-                ["Primary Stack", "Python + ML"],
-                ["Featured Repo", "RAJ Assistant"],
-                ["Focus Area", "NLP + Analytics"]
-              ].map(([label, value]) => (
-                <div key={label} className="rounded-3xl border border-white/10 bg-slate-950/50 p-5">
-                  <p className="text-sm text-muted-foreground">{label}</p>
-                  <p className="mt-2 text-xl font-bold text-white">{value}</p>
-                </div>
+            <div className="grid gap-4">
+              {(githubActivity?.repositories.length
+                ? githubActivity.repositories
+                : portfolio.projects.map((project, index) => ({
+                    id: index,
+                    name: project.title,
+                    url: project.github || portfolio.personal.github,
+                    description: project.description,
+                    language: project.technologies[0] ?? "Code",
+                    stars: 0,
+                    forks: 0,
+                    updatedAt: project.duration
+                  }))
+              ).map((repo) => (
+                <a
+                  key={repo.id}
+                  href={repo.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-3xl border border-white/10 bg-slate-950/50 p-5 transition hover:-translate-y-1 hover:border-cyan-300/30 hover:bg-white/[0.07]"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h4 className="font-bold text-white">{repo.name}</h4>
+                      <p className="mt-2 text-sm leading-6 text-muted-foreground">{repo.description}</p>
+                    </div>
+                    <ArrowUpRight className="h-5 w-5 shrink-0 text-cyan-300" />
+                  </div>
+                  <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+                    <span className="text-cyan-200">{repo.language}</span>
+                    <span className="inline-flex items-center gap-1">
+                      <Star className="h-3.5 w-3.5" /> {repo.stars}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <GitFork className="h-3.5 w-3.5" /> {repo.forks}
+                    </span>
+                  </div>
+                </a>
               ))}
             </div>
           </CardContent>
@@ -457,14 +572,14 @@ export default function Home() {
             </div>
             <div className="grid gap-3">
               <a
-                href="mailto:omupadhyay611@gmail.com"
+                href={`mailto:${portfolio.personal.email}`}
                 className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 font-semibold text-white transition hover:bg-white/10"
               >
                 <Mail className="h-5 w-5 text-cyan-300" />
-                omupadhyay611@gmail.com
+                {portfolio.personal.email}
               </a>
               <a
-                href="https://linkedin.com/in/om-upadhyay-467683268"
+                href={portfolio.personal.linkedin}
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 font-semibold text-white transition hover:bg-white/10"
@@ -473,7 +588,7 @@ export default function Home() {
                 LinkedIn
               </a>
               <a
-                href="https://github.com/Om-Upadhyay"
+                href={portfolio.personal.github}
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 font-semibold text-white transition hover:bg-white/10"
@@ -487,7 +602,7 @@ export default function Home() {
       </section>
 
       <footer className="container pb-10 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} Om Upadhyay. Designed for performance, polish, and Vercel.
+        © {new Date().getFullYear()} {portfolio.personal.name}. Dynamic Next.js portfolio.
       </footer>
     </main>
   );
