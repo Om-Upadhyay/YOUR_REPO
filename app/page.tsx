@@ -159,9 +159,9 @@ function ParticleBackground() {
 
 function TypingTitle() {
   return (
-    <h1 className="max-w-5xl text-5xl font-black leading-[0.95] tracking-[-0.08em] text-white sm:text-7xl lg:text-8xl">
+    <h1 className="max-w-6xl text-5xl font-black leading-none tracking-normal text-white sm:text-7xl lg:text-8xl">
       {portfolio.personal.name}
-      <span className="mt-4 block overflow-hidden whitespace-nowrap border-r-4 border-cyan-300 pr-2 text-gradient motion-safe:animate-[typing_3.5s_steps(28,end),blink_0.8s_step-end_infinite]">
+      <span className="mt-4 block max-w-full break-words leading-none text-gradient [text-wrap:balance]">
         {portfolio.personal.title}
       </span>
     </h1>
