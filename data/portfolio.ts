@@ -16,8 +16,55 @@ export const portfolio = {
 
     resume: "/Paccar.pdf",
 
-    profileImage: "/profile.jpg",
+    profileImage: "/projects/profile.png",
   },
+
+  roleChips: [
+    "AI/ML",
+    "Data Analytics",
+    "Backend"
+  ],
+
+  outcomes: [
+    {
+      label: "Projects",
+      value: "3",
+      detail: "AI, NLP, and analytics systems"
+    },
+    {
+      label: "NLP Accuracy",
+      value: "80%",
+      detail: "Automated DSA answer evaluation"
+    },
+    {
+      label: "AWS Score",
+      value: "91.35%",
+      detail: "Cloud Foundations credential"
+    },
+    {
+      label: "Internship",
+      value: "Ashok Leyland",
+      detail: "Data Analyst Intern"
+    }
+  ],
+
+  recruiterProof: [
+    {
+      title: "Builds complete AI products",
+      description:
+        "Combines Python, NLP, computer vision, Flask, and automation to turn ideas into usable applications."
+    },
+    {
+      title: "Understands data workflows",
+      description:
+        "Works across EDA, preprocessing, feature engineering, SQL, visualization, and business insight generation."
+    },
+    {
+      title: "Shows measurable outcomes",
+      description:
+        "Delivered an NLP evaluator with 80% accuracy and completed AWS Cloud Foundations with a 91.35% score."
+    }
+  ],
 
   about: `
 I am a Computer Science undergraduate specializing in Artificial Intelligence and Analytics at MIT School of Computing.
@@ -172,7 +219,20 @@ I enjoy building real-world AI applications that solve meaningful problems. My e
       github:
         "https://github.com/Om-Upadhyay/RAJ-assitant-",
 
-      demo: ""
+      demo: "",
+
+      image: "/projects/raj-assistant.png",
+
+      bestFor: "Best for AI/ML + automation roles",
+
+      impact:
+        "Demonstrates practical AI product thinking by combining voice input, NLP reasoning, automation, and computer vision in one assistant.",
+
+      metrics: [
+        "4-member academic team",
+        "Speech-to-text + text-to-speech pipeline",
+        "Real-time command automation"
+      ]
     },
 
     {
@@ -204,7 +264,20 @@ I enjoy building real-world AI applications that solve meaningful problems. My e
 
       github: "",
 
-      demo: ""
+      demo: "",
+
+      image: "/projects/dsa-evaluator.png",
+
+      bestFor: "Best for NLP + backend roles",
+
+      impact:
+        "Shows model evaluation, text similarity, keyword extraction, dataset preparation, and backend integration for a real academic assessment workflow.",
+
+      metrics: [
+        "80% evaluation accuracy",
+        "Transformer-based scoring",
+        "Flask + MySQL application flow"
+      ]
     },
 
     {
@@ -234,7 +307,20 @@ I enjoy building real-world AI applications that solve meaningful problems. My e
 
       github: "",
 
-      demo: ""
+      demo: "",
+
+      image: "",
+
+      bestFor: "Best for data analytics roles",
+
+      impact:
+        "Highlights exploratory analysis, regression modeling, clustering, and feature engineering for automotive health insights.",
+
+      metrics: [
+        "EDA-first analysis",
+        "Regression + clustering",
+        "Automotive data domain"
+      ]
     }
   ],
 
